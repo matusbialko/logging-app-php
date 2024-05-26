@@ -1,4 +1,3 @@
-
 <?php
     $greeting = 'Ahoj!';
     $currentDate = date('H:i:s j.m.Y');
