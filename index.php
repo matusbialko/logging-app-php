@@ -22,20 +22,25 @@
                 return "$value <br>";
             }
             
-            function writeTimeLog($currentDate): string {
+            function writeTimeLog($currentDate, $isLate, $tooLateToLog): string {
                 echo '<br>';
 
-                if ($GLOBALS['tooLateToLog']) return die('<br> Daný príchod sa nemôže zapísať.');
+                if ($tooLateToLog) {
+                    die('<br> Daný príchod sa nemôže zapísať.');
+                }
 
-                if ($GLOBALS['isLate']) return file_put_contents('timeLogs.txt', lineBreakValue("$currentDate - meškanie"), FILE_APPEND);
-
+                if ($isLate) {
+                    return file_put_contents('timeLogs.txt', lineBreakValue("$currentDate - meškanie"), FILE_APPEND);
+                }
                 return file_put_contents('timeLogs.txt', lineBreakValue($currentDate), FILE_APPEND);
             }
 
             function getLogs(): void {
                 echo '<br>';
                 echo lineBreakValue('Časové záznamy:');
-                if (!file_exists('timeLogs.txt')) die('Neexistujú žiadne časové záznamy');
+                if (!file_exists('timeLogs.txt')) {
+                    die('Neexistujú žiadne časové záznamy');
+                }
                 echo lineBreakValue(file_get_contents('timeLogs.txt'));
             }
 
@@ -44,9 +49,12 @@
                 static $studentsArray = [];
 
                 public static function logStudent($name): void {
-                    if (file_exists('studenti.json')) self::$studentsArray = json_decode(file_get_contents('studenti.json'));
-                
-                    if (file_exists('totalStudentEntriesNumber.json')) self::$totalStudentEntries = json_decode(file_get_contents('totalStudentEntriesNumber.json'));
+                    if (file_exists('studenti.json')) {
+                        self::$studentsArray = json_decode(file_get_contents('studenti.json'));
+                    }
+                    if (file_exists('totalStudentEntriesNumber.json')) {
+                        self::$totalStudentEntries = json_decode(file_get_contents('totalStudentEntriesNumber.json'));
+                    }
                     
                     if ($name) {
                         self::$studentsArray[] = array('name'=>$name);
@@ -59,14 +67,20 @@
                 }
 
                 public static function showStudentsArray(): void {
-                    if (file_exists('totalStudentEntriesNumber.json')) self::$totalStudentEntries = json_decode(file_get_contents('totalStudentEntriesNumber.json'));
+                    if (file_exists('totalStudentEntriesNumber.json')) {
+                        self::$totalStudentEntries = json_decode(file_get_contents('totalStudentEntriesNumber.json'));
+                    }
                     print_r(lineBreakValue("Celkový počet príchodov študentov: " . self::$totalStudentEntries));  
                     echo '<br>';
 
-                    if (file_exists('studenti.json')) self::$studentsArray = json_decode(file_get_contents('studenti.json'));
+                    if (file_exists('studenti.json')) {
+                        self::$studentsArray = json_decode(file_get_contents('studenti.json'));
+                    }
 
                     print lineBreakValue('<strong>Študenti:</strong>');
-                    if (self::$studentsArray) print_r(self::$studentsArray);
+                    if (self::$studentsArray) {
+                        print_r(self::$studentsArray);
+                    }
                 }
             }
 
@@ -79,18 +93,20 @@
                 }
 
                 private function checkForLateEntries(): void {
-                    for ($i = 0; $i < count($this->entriesArray)-1; $i++) {
+                    for ($i = 0; $i < count($this->entriesArray); $i++) {
                         $this->entriesArray[$i]->meškanie = $this->isEntryLate($this->entriesArray[$i]?->date) ? 'áno' : 'nie';
                     }
                 }
  
                 public function logEntry($currentDate): void {
-                    if (file_exists('prichody.json')) $this->entriesArray = json_decode(file_get_contents('prichody.json'));
+                    if (file_exists('prichody.json')) {
+                        $this->entriesArray = json_decode(file_get_contents('prichody.json'));
+                    }
 
-                    $this->entriesArray[] = array(
-                        'date'=>$currentDate,
-                        'meškanie'=>'nie'
-                    );
+                    $newObj = new stdClass();
+                    $newObj->date = $currentDate;
+                    $newObj->meškanie = $this->isEntryLate($currentDate) ? 'ano' : 'nie';
+                    $this->entriesArray[] = $newObj;
 
                     $this->checkForLateEntries();
 
@@ -98,9 +114,13 @@
                 }
 
                 public function showEntriesArray() {
-                    if (file_exists('prichody.json')) $this->entriesArray = json_decode(file_get_contents('prichody.json'));
+                    if (file_exists('prichody.json')) {
+                        $this->entriesArray = json_decode(file_get_contents('prichody.json'));
+                    }
                     print lineBreakValue('<strong>Príchody:</strong>');
-                    if ($this->entriesArray) print_r($this->entriesArray);
+                    if ($this->entriesArray) {
+                        print_r($this->entriesArray);
+                    }
                 }
             }
 
@@ -122,7 +142,7 @@
             $newEntry->logEntry($currentDate);
             $newEntry->showEntriesArray();
 
-            writeTimeLog($currentDate);
+            writeTimeLog($currentDate, $isLate, $tooLateToLog);
             getLogs();
         ?>
     </body>
